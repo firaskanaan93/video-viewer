@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Viewer</title>
+    <style>
+        #logs {
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            font-family: monospace;
+            white-space: pre;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>Set Video URL</h1>
+<form action="/set-url" method="POST">
+    <input type="text" name="url" placeholder="Enter video URL" required>
+    <button type="submit">Set URL</button>
+</form>
+
+<h2>View Count: <span id="view-count">0</span></h2>
+<h2>Video Duration: <span id="video-duration">0</span> seconds</h2>
+<h2>Logs</h2>
+<div id="logs"></div>
+
+<script>
+    async function fetchViewData() {
+        try {
+            const response = await fetch('/view-count');
+            const data = await response.json();
+            document.getElementById('view-count').textContent = data.count;
+            document.getElementById('video-duration').textContent = data.duration.toFixed(2);
+        } catch (error) {
+            console.error('Error fetching view data:', error);
+        }
+    }
+
+    async function fetchLogs() {
+        try {
+            const response = await fetch('/logs');
+            const data = await response.json();
+            const logsContainer = document.getElementById('logs');
+            logsContainer.innerHTML = '';
+            data.logs.forEach(log => {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.textContent = log;
+                logsContainer.appendChild(logEntry);
+            });
+            logsContainer.scrollTop = logsContainer.scrollHeight; // Auto-scroll to the bottom
+        } catch (error) {
+            console.error('Error fetching logs:', error);
+        }
+    }
+
+    setInterval(fetchViewData, 5000);
+    setInterval(fetchLogs, 5000);
+</script>
+</body>
+</html>

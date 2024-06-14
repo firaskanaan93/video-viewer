@@ -1,0 +1,57 @@
+const puppeteer = require('puppeteer');
+
+async function watchVideo(url) {
+    const browser = await puppeteer.launch({
+        headless: false, // Set to true for headless mode
+        defaultViewport: null,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        timeout: 0 // Disable timeout for launching the browser
+    });
+
+    const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(60000); // Set navigation timeout to 60 seconds
+    page.setDefaultTimeout(60000); // Set default timeout for all Puppeteer operations to 60 seconds
+
+    try {
+        await page.goto(url, { waitUntil: 'networkidle2' });
+
+        // Attempt to auto-play the video
+        const duration = await page.evaluate(() => {
+            return new Promise((resolve, reject) => {
+                const video = document.querySelector('video');
+                if (video) {
+                    video.muted = true; // Mute the video to avoid auto-play restrictions
+                    video.play()
+                        .then(() => {
+                            resolve(video.duration);
+                        })
+                        .catch(err => reject(`Error playing video: ${err.message}`));
+                } else {
+                    reject('No video element found.');
+                }
+            });
+        });
+
+        console.log(`Video duration: ${duration} seconds`);
+
+        // Wait for the video to finish playing
+        await new Promise(resolve => setTimeout(resolve, duration * 1000));
+
+        console.log('Video watched completely!');
+    } catch (error) {
+        console.error(`Error: ${error}`);
+    } finally {
+        await browser.close();
+    }
+}
+
+(async () => {
+    const videoUrl = 'https://www.youtube.com/watch?v=HzdneWQRNgw'; // Replace with your video URL
+    const repeatCount = 5; // Number of times to repeat
+
+    for (let i = 0; i < repeatCount; i++) {
+        console.log(`Watching video... ${i + 1} / ${repeatCount}`);
+        await watchVideo(videoUrl);
+        console.log(`Completed watch ${i + 1}`);
+    }
+})();
