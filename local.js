@@ -1,14 +1,38 @@
 const puppeteer = require('puppeteer');
+const userAgents = [
+    // Windows User Agents
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:89.0) Gecko/20100101 Firefox/89.0',
+
+    // macOS User Agents
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0',
+
+    // Android User Agents
+    'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36',
+
+    // iOS User Agents
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (iPad; CPU OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1'
+];
+function getRandomUserAgent() {
+    return userAgents[Math.floor(Math.random() * userAgents.length)];
+}
 
 async function watchVideo(url) {
+    const userAgent = getRandomUserAgent();
     const browser = await puppeteer.launch({
         headless: false, // Set to true for headless mode
         defaultViewport: null,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: ['--no-sandbox', '--disable-setuid-sandbox'
+            // ,'--proxy-server=socks5://localhost:9050'
+        ],
         timeout: 0 // Disable timeout for launching the browser
     });
 
     const page = await browser.newPage();
+    await page.setUserAgent(userAgent);
     page.setDefaultNavigationTimeout(60000); // Set navigation timeout to 60 seconds
     page.setDefaultTimeout(60000); // Set default timeout for all Puppeteer operations to 60 seconds
 
@@ -47,7 +71,7 @@ async function watchVideo(url) {
 
 (async () => {
     const videoUrl = 'https://www.youtube.com/watch?v=HzdneWQRNgw'; // Replace with your video URL
-    const repeatCount = 5; // Number of times to repeat
+    const repeatCount = 10000; // Number of times to repeat
 
     for (let i = 0; i < repeatCount; i++) {
         console.log(`Watching video... ${i + 1} / ${repeatCount}`);

@@ -1,0 +1,13 @@
+
+{
+  "name": "video-viewer",
+  "version": "1.0.0",
+  "description": "Puppeteer script to watch video with randomized user agents.",
+  "main": "watch-video.js",
+  "scripts": {
+    "start": "node watch-video.js"
+  },
+  "dependencies": {
+    "puppeteer": "^20.0.0"
+  }
+}
